@@ -1,0 +1,218 @@
+================================================================================
+CLINICAL WORKFLOW AGENT - EXAMPLE QUERIES
+================================================================================
+
+This file contains example queries you can use to test the Clinical Workflow Agent.
+Copy and paste any query into the web interface to test different functionalities.
+
+================================================================================
+1. PATIENT SEARCH QUERIES
+================================================================================
+
+Find patient Ravi Kumar
+Find patient Priya Sharma
+Find patient Amit Patel
+Find patient Sundaram Iyer
+Find patient Lakshmi Menon
+Find patient Meera Devi
+Find patient Vijay Nair
+Find patient Anjali Reddy
+Find patient Murugan Pillai
+Find patient Anitha Krishnan
+Find patient Sekar Raman
+Find patient Kamala Venkatesh
+Find patient Rajesh Naidu
+Find patient Divya Gopal
+Find patient Suresh Iyengar
+Find patient Malathi Subramanian
+Find patient Karthik Narayanan
+Find patient Saranya Mohan
+Find patient Arjun Swamy
+Find patient Deepika Ravi
+Find patient Srinivasan Ganesh
+
+Search for patient Ravi Kumar
+Search patient Priya Sharma
+Look for patient Amit Patel
+
+================================================================================
+2. INSURANCE ELIGIBILITY QUERIES
+================================================================================
+
+Check insurance eligibility for patient Ravi Kumar
+Check insurance for Priya Sharma
+Check insurance eligibility for Amit Patel
+Check insurance for Sundaram Iyer
+Check insurance eligibility for Lakshmi Menon
+Check insurance for Meera Devi
+Check insurance eligibility for Vijay Nair
+Check insurance for Anjali Reddy
+Check insurance eligibility for Murugan Pillai
+Check insurance for Anitha Krishnan
+Check insurance eligibility for Sekar Raman
+Check insurance for Kamala Venkatesh
+Check insurance eligibility for Rajesh Naidu
+Check insurance for Divya Gopal
+Check insurance eligibility for Suresh Iyengar
+Check insurance for Malathi Subramanian
+Check insurance eligibility for Karthik Narayanan
+Check insurance for Saranya Mohan
+Check insurance eligibility for Arjun Swamy
+Check insurance for Deepika Ravi
+Check insurance eligibility for Srinivasan Ganesh
+
+Verify insurance coverage for Ravi Kumar
+Check eligibility for Priya Sharma
+
+================================================================================
+3. FIND AVAILABLE APPOINTMENT SLOTS QUERIES
+================================================================================
+
+Find available cardiology appointments next week
+Find cardiology appointments
+Find available cardiology slots
+Find cardiology appointment slots next week
+Find available cardiology appointments
+
+Find available orthopedic appointments
+Find orthopedic slots
+Find orthopedics appointments next week
+
+Find available general practice appointments
+Find general appointments
+Find general practice slots
+
+Find available neurology appointments
+Find neurology slots
+
+================================================================================
+4. BOOK APPOINTMENT QUERIES (COMPLETE WORKFLOW)
+================================================================================
+
+Book a cardiology appointment for Ravi Kumar
+Book appointment for Priya Sharma
+Schedule a cardiology appointment for Amit Patel
+Book a cardiology appointment for Sundaram Iyer
+Book appointment for Lakshmi Menon
+Schedule appointment for Meera Devi
+Book a cardiology appointment for Vijay Nair
+Book appointment for Anjali Reddy
+Schedule a cardiology appointment for Murugan Pillai
+Book appointment for Anitha Krishnan
+Book a cardiology appointment for Sekar Raman
+Schedule appointment for Kamala Venkatesh
+Book appointment for Rajesh Naidu
+Book a cardiology appointment for Divya Gopal
+Schedule appointment for Suresh Iyengar
+Book appointment for Malathi Subramanian
+Book a cardiology appointment for Karthik Narayanan
+Schedule appointment for Saranya Mohan
+Book appointment for Arjun Swamy
+Book a cardiology appointment for Deepika Ravi
+Schedule appointment for Srinivasan Ganesh
+
+Book orthopedic appointment for Ravi Kumar
+Schedule general practice appointment for Priya Sharma
+Book neurology appointment for Amit Patel
+
+Make appointment for Ravi Kumar
+Schedule appointment for Priya Sharma
+
+================================================================================
+5. COMPLETE WORKFLOW QUERIES (MULTI-STEP)
+================================================================================
+
+Find patient Ravi Kumar and check insurance eligibility
+Find patient Priya Sharma, check insurance, and book appointment
+Search for patient Amit Patel, check insurance eligibility, find cardiology appointments, and book appointment
+
+Check insurance for Ravi Kumar and book a cardiology appointment
+Find cardiology appointments and book for Priya Sharma
+
+================================================================================
+6. GREETINGS AND GENERAL QUESTIONS
+================================================================================
+
+Hello
+Hi
+Hey
+What can you do?
+Help
+How are you?
+What are you?
+
+================================================================================
+QUERY PATTERNS AND TIPS
+================================================================================
+
+PATIENT SEARCH:
+- "Find patient [Name]"
+- "Search for patient [Name]"
+- "Search patient [Name]"
+- "Look for patient [Name]"
+
+INSURANCE CHECK:
+- "Check insurance for [Name]"
+- "Check insurance eligibility for patient [Name]"
+- "Verify insurance for [Name]"
+
+FIND APPOINTMENTS:
+- "Find available [specialty] appointments"
+- "Find [specialty] appointments next week"
+- "Find [specialty] slots"
+
+BOOK APPOINTMENT:
+- "Book appointment for [Name]"
+- "Book a [specialty] appointment for [Name]"
+- "Schedule appointment for [Name]"
+- "Schedule a [specialty] appointment for [Name]"
+- "Make appointment for [Name]"
+
+AVAILABLE SPECIALTIES:
+- cardiology
+- orthopedic / orthopedics
+- general / general-practice
+- neurology
+
+AVAILABLE PATIENTS (20 Total):
+1. Ravi Kumar
+2. Priya Sharma
+3. Amit Patel
+4. Sundaram Iyer
+5. Lakshmi Menon
+6. Meera Devi
+7. Vijay Nair
+8. Anjali Reddy
+9. Murugan Pillai
+10. Anitha Krishnan
+11. Sekar Raman
+12. Kamala Venkatesh
+13. Rajesh Naidu
+14. Divya Gopal
+15. Suresh Iyengar
+16. Malathi Subramanian
+17. Karthik Narayanan
+18. Saranya Mohan
+19. Arjun Swamy
+20. Deepika Ravi
+21. Srinivasan Ganesh
+
+================================================================================
+NOTES
+================================================================================
+
+- The agent will automatically chain functions when booking appointments:
+  1. Search for patient (if name provided)
+  2. Find available slots
+  3. Book appointment using first available slot
+
+- Insurance checks will automatically map patient names to IDs without searching first
+
+- Appointment searches will NOT trigger patient searches (only shows available slots)
+
+- All queries are case-insensitive
+
+- You can use partial names (e.g., "Ravi" instead of "Ravi Kumar")
+
+================================================================================
+

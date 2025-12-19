@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Workflow Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1a1a1a;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .sidebar-nav {
+            padding: 8px;
+        }
+
+        .nav-item {
+            padding: 10px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        .sidebar-section {
+            margin-top: 16px;
+            padding: 8px;
+        }
+
+        .sidebar-section-title {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            padding: 8px 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .example-query {
+            padding: 10px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .example-query:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateX(4px);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1a1a1a;
+        }
+
+        .chat-header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chat-header p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 4px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            background: transparent;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .message.agent .message-avatar {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 80%;
+        }
+
+        .message.user .message-content {
+            text-align: right;
+        }
+
+        .message-text {
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .message.user .message-text {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message.agent .message-text {
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .function-call {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .function-name {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .function-result {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            margin-top: 8px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        table thead tr {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        table td {
+            padding: 12px;
+            font-size: 13px;
+            color: #ffffff;
+        }
+
+        table td:first-child {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .error-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .error-title {
+            color: #ff6b6b;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .error-message {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .success-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .success-title {
+            color: #4ade80;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .success-message {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .info-message {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .input-container {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .input-wrapper {
+            max-width: 768px;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        #user-input:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #user-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #send-btn {
+            padding: 12px 24px;
+            background: #ffffff;
+            border: none;
+            border-radius: 12px;
+            color: #000000;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        #send-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        #send-btn:disabled {
+            background: #666666;
+            color: #999999;
+            cursor: not-allowed;
+        }
+
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
+        }
+
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-bar {
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Clinical Workflow Agent</div>
+            <div class="sidebar-subtitle">Healthcare Automation</div>
+        </div>
+
+      
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Example Queries</div>
+            <div class="example-query" onclick="useExample('Find patient Ravi Kumar')">
+                Find patient Ravi Kumar
+            </div>
+            <div class="example-query" onclick="useExample('Check insurance eligibility for patient Ravi Kumar')">
+                Check insurance for Ravi Kumar
+            </div>
+            <div class="example-query" onclick="useExample('Find available cardiology appointments next week')">
+                Find cardiology appointments
+            </div>
+            <div class="example-query" onclick="useExample('Book a cardiology appointment for Ravi Kumar')">
+                Book appointment for Ravi Kumar
+            </div>
+            <div class="example-query" onclick="useExample('Book appointment for Priya Sharma')">
+                Book appointment for Priya Sharma
+            </div>
+            <div class="example-query" onclick="useExample('Schedule appointment for Meera Devi')">
+                Schedule appointment
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-title">Available Functions</div>
+            <div class="example-query" style="cursor: default; opacity: 0.7;">
+                search_patient
+            </div>
+            <div class="example-query" style="cursor: default; opacity: 0.7;">
+                check_insurance_eligibility
+            </div>
+            <div class="example-query" style="cursor: default; opacity: 0.7;">
+                find_available_slots
+            </div>
+            <div class="example-query" style="cursor: default; opacity: 0.7;">
+                book_appointment
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Agent Ready</span>
+            </div>
+            <div>Mode: Sandbox | Model: Mistral-7B</div>
+        </div>
+
+        <div class="chat-header">
+            <h1>Clinical Workflow Automation Agent</h1>
+            <p>AI-powered healthcare workflow orchestration with function calling</p>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <div class="message agent">
+                <div class="message-avatar">A</div>
+                <div class="message-content">
+                    <div class="message-text">
+                        Welcome! I'm your Clinical Workflow Agent. I can help you with:<br><br>
+                        • Searching for patients<br>
+                        • Checking insurance eligibility<br>
+                        • Finding available appointment slots<br>
+                        • Booking appointments<br><br>
+                        <strong>Note:</strong> I do NOT provide medical advice or diagnosis.<br><br>
+                        Try one of the example queries on the left, or type your own request!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="user-input" 
+                    placeholder="Ask anything..."
+                    autocomplete="off"
+                />
+                <button id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function useExample(text) {
+            userInput.value = text;
+            userInput.focus();
+        }
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'agent'}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.textContent = isUser ? 'U' : 'A';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.innerHTML = content;
+            
+            contentDiv.appendChild(textDiv);
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatResponse(response) {
+            let html = '';
+            
+            // Handle error messages first
+            if (response.error) {
+                html = '<div class="error-box">';
+                html += '<div class="error-title">' + (response.reason || 'ERROR') + '</div>';
+                html += '<div class="error-message">' + response.error.replace(/\n/g, '<br>') + '</div>';
+                html += '</div>';
+                return html;
+            }
+            
+            // Handle message-only responses (greetings, general questions)
+            if (response.message || response.final_response) {
+                const message = response.message || response.final_response;
+                html = '<div class="info-box">';
+                html += '<div class="info-message">' + message.replace(/\n/g, '<br>') + '</div>';
+                html += '</div>';
+                return html;
+            }
+            
+            if (typeof response === 'string') {
+                html = response.replace(/\n/g, '<br>');
+            } else if (response.results && Array.isArray(response.results)) {
+                // Detect primary intent from request
+                const request = (response.request || '').toLowerCase();
+                const isInsuranceQuery = request.includes('insurance') || request.includes('eligibility') || request.includes('coverage');
+                const isAppointmentQuery = request.includes('appointment') || request.includes('slot') || request.includes('available');
+                const isBookingQuery = request.includes('book') || request.includes('schedule appointment');
+                const isPatientQuery = request.includes('find patient') || request.includes('search patient') || request.includes('search for patient');
+                
+                // Format function results in tables - only show primary requested information
+                html += '<div style="margin-top: 10px;">';
+                
+                response.results.forEach((result, index) => {
+                    const funcName = result.function || 'Unknown';
+                    const funcResult = result.result || {};
+                    
+                    // Skip intermediate search_patient calls for insurance/appointment queries
+                    if (funcName === 'search_patient') {
+                        // Only show patient search if explicitly requested
+                        if (!isPatientQuery && (isInsuranceQuery || isAppointmentQuery || isBookingQuery)) {
+                            return; // Skip this result
+                        }
+                    }
+                    
+                    html += '<div class="function-call" style="margin-bottom: 20px;">';
+                    html += '<div class="function-name">' + (index + 1) + '. ' + funcName + '</div>';
+                    
+                    // Format based on function type
+                    if (funcName === 'search_patient' && funcResult.patients) {
+                        html += formatPatientTable(funcResult.patients);
+                    } else if (funcName === 'check_insurance_eligibility' && funcResult.coverage) {
+                        html += formatInsuranceTable(funcResult);
+                    } else if (funcName === 'find_available_slots' && funcResult.slots) {
+                        html += formatSlotsTable(funcResult.slots);
+                    } else if (funcName === 'book_appointment' && funcResult.appointment) {
+                        html += formatAppointmentTable(funcResult.appointment);
+                    } else if (funcName === 'book_appointment') {
+                        // Always show error details for booking failures
+                        if (funcResult.error) {
+                            html += '<div class="error-box">';
+                            html += '<div class="error-title">Booking Failed</div>';
+                            html += '<div class="error-message">' + (funcResult.error || 'Unknown error occurred') + '</div>';
+                            html += '</div>';
+                        } else if (!funcResult.success) {
+                            html += '<div class="error-box">';
+                            html += '<div class="error-title">Booking Failed</div>';
+                            html += '<div class="error-message">' + (funcResult.error || 'Unknown error occurred') + '</div>';
+                            html += '</div>';
+                        } else {
+                            html += formatGenericResult(funcResult);
+                        }
+                    } else {
+                        html += formatGenericResult(funcResult);
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div>';
+            } else if (response.functions_called && response.functions_called.length > 0) {
+                html += '<div class="function-call">';
+                html += '<div class="function-name">Functions Called</div>';
+                response.functions_called.forEach(func => {
+                    html += '<div style="margin-top: 8px;">';
+                    html += '<div style="color: #9ca3af; font-size: 12px;">' + func.name + '</div>';
+                    if (func.parameters) {
+                        html += '<div class="function-result">' + JSON.stringify(func.parameters, null, 2) + '</div>';
+                    }
+                    if (func.result) {
+                        html += '<div class="function-result">' + JSON.stringify(func.result, null, 2) + '</div>';
+                    }
+                    html += '</div>';
+                });
+                html += '</div>';
+            } else {
+                if (response.response) {
+                    html = response.response.replace(/\n/g, '<br>');
+                } else {
+                    html = JSON.stringify(response, null, 2);
+                }
+            }
+            
+            return html;
+        }
+        
+        function formatPatientTable(patients) {
+            if (!patients || patients.length === 0) return '<div class="info-message">No patients found.</div>';
+            
+            let html = '<table>';
+            html += '<thead><tr>';
+            html += '<th>Field</th>';
+            html += '<th>Value</th>';
+            html += '</tr></thead><tbody>';
+            
+            patients.forEach((patient, idx) => {
+                if (idx > 0) html += '<tr><td colspan="2" style="background: rgba(0, 0, 0, 0.4); font-weight: 600; color: #ffffff;">Patient ' + (idx + 1) + '</td></tr>';
+                
+                const fields = [
+                    { label: 'Patient ID', value: patient.id },
+                    { label: 'Name', value: patient.name },
+                    { label: 'Given Name', value: patient.givenName || patient.given_name },
+                    { label: 'Family Name', value: patient.familyName || patient.family_name },
+                    { label: 'Birth Date', value: patient.birthDate || patient.birth_date },
+                    { label: 'Gender', value: patient.gender },
+                    { label: 'Phone', value: patient.phone },
+                    { label: 'Email', value: patient.email },
+                    { label: 'Address', value: patient.address || 'N/A' }
+                ];
+                
+                fields.forEach(field => {
+                    if (field.value) {
+                        html += '<tr>';
+                        html += '<td>' + field.label + '</td>';
+                        html += '<td>' + field.value + '</td>';
+                        html += '</tr>';
+                    }
+                });
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function formatInsuranceTable(result) {
+            const coverage = result.coverage || {};
+            const eligible = result.eligible ? 'Eligible' : 'Not Eligible';
+            
+            let html = '<table>';
+            html += '<thead><tr>';
+            html += '<th>Insurance Information</th>';
+            html += '<th>Details</th>';
+            html += '</tr></thead><tbody>';
+            
+            const fields = [
+                { label: 'Status', value: eligible },
+                { label: 'Coverage Status', value: coverage.status },
+                { label: 'Payer', value: coverage.payer },
+                { label: 'Plan Name', value: coverage.planName || coverage.plan_name },
+                { label: 'Subscriber ID', value: coverage.subscriberId || coverage.subscriber_id },
+                { label: 'Copay Amount', value: coverage.copayAmount || coverage.copay_amount ? '₹' + coverage.copayAmount : 'N/A' },
+                { label: 'Period Start', value: coverage.periodStart || coverage.period_start },
+                { label: 'Period End', value: coverage.periodEnd || coverage.period_end }
+            ];
+            
+            fields.forEach(field => {
+                if (field.value) {
+                    html += '<tr>';
+                    html += '<td>' + field.label + '</td>';
+                    html += '<td>' + field.value + '</td>';
+                    html += '</tr>';
+                }
+            });
+            
+            html += '</tbody></table>';
+            if (result.message) {
+                html += '<div class="info-message" style="margin-top: 12px;">' + result.message + '</div>';
+            }
+            return html;
+        }
+        
+        function formatSlotsTable(slots) {
+            if (!slots || slots.length === 0) return '<div class="info-message">No available slots found.</div>';
+            
+            let html = '<table>';
+            html += '<thead><tr>';
+            html += '<th>Date & Time</th>';
+            html += '<th>Provider</th>';
+            html += '<th>Specialty</th>';
+            html += '<th>Location</th>';
+            html += '</tr></thead><tbody>';
+            
+            slots.forEach(slot => {
+                const startTime = slot.startTime || slot.start_time;
+                const endTime = slot.endTime || slot.end_time;
+                const provider = slot.providerName || slot.provider_name;
+                const specialty = slot.specialty;
+                const location = slot.location;
+                
+                html += '<tr>';
+                html += '<td>' + formatDateTime(startTime) + ' - ' + formatDateTime(endTime) + '</td>';
+                html += '<td>' + provider + '</td>';
+                html += '<td>' + specialty + '</td>';
+                html += '<td>' + location + '</td>';
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            return html;
+        }
+        
+        function formatAppointmentTable(appointment) {
+            let html = '<div class="success-box">';
+            html += '<div class="success-title">Appointment Booked Successfully</div>';
+            html += '<table style="margin-top: 12px;">';
+            
+            const fields = [
+                { label: 'Appointment ID', value: appointment.id },
+                { label: 'Patient', value: appointment.patientName || appointment.patient_name },
+                { label: 'Provider', value: appointment.providerName || appointment.provider_name },
+                { label: 'Specialty', value: appointment.specialty },
+                { label: 'Date & Time', value: formatDateTime(appointment.startTime || appointment.start_time) + ' - ' + formatDateTime(appointment.endTime || appointment.end_time) },
+                { label: 'Location', value: appointment.location },
+                { label: 'Status', value: appointment.status },
+                { label: 'Reason', value: appointment.reason || 'N/A' }
+            ];
+            
+            fields.forEach(field => {
+                if (field.value) {
+                    html += '<tr>';
+                    html += '<td>' + field.label + '</td>';
+                    html += '<td>' + field.value + '</td>';
+                    html += '</tr>';
+                }
+            });
+            
+            html += '</table></div>';
+            return html;
+        }
+        
+        function formatGenericResult(result) {
+            if (result.success) {
+                let html = '<div class="success-box">';
+                html += '<div class="success-title">Success</div>';
+                if (result.message) {
+                    html += '<div class="success-message">' + result.message + '</div>';
+                }
+                html += '</div>';
+                return html;
+            } else {
+                // Show detailed error information
+                let errorMsg = result.error || 'Error occurred';
+                // If error is an object, try to extract message
+                if (typeof errorMsg === 'object') {
+                    errorMsg = JSON.stringify(errorMsg, null, 2);
+                }
+                // Log full result for debugging
+                console.error('Error details:', result);
+                return '<div class="error-box"><div class="error-title">Error</div><div class="error-message">' + errorMsg + '</div></div>';
+            }
+        }
+        
+        function formatDateTime(dateStr) {
+            if (!dateStr) return 'N/A';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Disable input
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loader"></span>';
+            userInput.disabled = true;
+
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage(formatResponse(data.response), false);
+                } else {
+                    const errorResponse = {
+                        error: data.error || 'An error occurred',
+                        reason: data.reason || 'ERROR'
+                    };
+                    addMessage(formatResponse(errorResponse), false);
+                }
+            } catch (error) {
+                addMessage(formatResponse({
+                    error: 'Network error: ' + error.message,
+                    reason: 'NETWORK_ERROR'
+                }), false);
+            } finally {
+                // Re-enable input
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Auto-focus input on load
+        userInput.focus();
+    </script>
+</body>
+</html>
